@@ -90,6 +90,32 @@ func Load(path string) (HadoopConf, error) {
 	return conf, nil
 }
 
+func LoadWithPaths(paths []string)(HadoopConf,error) {
+	var conf HadoopConf
+	for _,file := range paths{
+		pList := propertyList{}
+		f,err := ioutil.ReadFile(file)
+		if os.IsNotExist(err) {
+			continue
+		} else if err != nil{
+			return conf,err
+		}
+
+		if conf == nil {
+			conf = make(HadoopConf)
+		}
+
+		err = xml.Unmarshal(f,&pList)
+		if err != nil{
+			return conf, fmt.Errorf("%s: %s", file, err)
+		}
+		for _, prop := range pList.Property {
+			conf[prop.Name] = prop.Value
+		}
+	}
+	return conf,nil
+}
+
 // Namenodes returns the namenode hosts present in the configuration. The
 // returned slice will be sorted and deduped. The values are loaded from
 // fs.defaultFS (or the deprecated fs.default.name), or fields beginning with

@@ -229,6 +229,23 @@ func New(address string) (*Client, error) {
 	return NewClient(options)
 }
 
+// Create Client from given path
+func NewWithPath(CoreSitePath string,HdfsPath string)(*Client,error) {
+	conf,err := hadoopconf.LoadWithPaths([]string{CoreSitePath,HdfsPath})
+	if err != nil {
+		return nil, err
+	}
+	options := ClientOptionsFromConf(conf)
+
+	u, err := user.Current()
+	if err != nil {
+		return nil, err
+	}
+
+	options.User = u.Username
+	return NewClient(options)
+}
+
 // User returns the user that the Client is acting under. This is either the
 // current system user or the kerberos principal.
 func (c *Client) User() string {
